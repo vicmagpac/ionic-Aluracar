@@ -1,10 +1,9 @@
-angular.module('starter').controller('ListagemController', function ($scope) {
+angular.module('starter').controller('ListagemController', function ($scope, CarroService) {
 
-	$scope.listaDeCarros = [
-		{nome: 'Palio', preco: 20000},
-		{nome: 'Gol', preco: 21000},
-		{nome: 'Peugeot', preco: 22000},
-	];
+
+	CarroService.obterCarros().then(function(dados) {
+		$scope.listaDeCarros = dados;
+	});
 
 	$scope.tituloRodape = 'Alura Car';
 });
@@ -26,4 +25,45 @@ angular.module('starter').controller('CarroEscolhidoController', function ($stat
 			$scope.carroEscolhido.preco -= acessorio.preco;
 		}
 	};
+});
+
+
+angular.module('starter')
+.controller('FinalizarPedidoController', function($stateParams, $scope
+	, $ionicPopup, $state, CarroService){
+
+	$scope.carroFinalizado = angular.fromJson($stateParams.carro);
+
+	$scope.pedido = {};
+
+	$scope.finalizarPedido = function(){
+
+		var pedidoFinalizado = {
+			params : {
+				carro : $scope.carroFinalizado.nome,
+				preco : $scope.carroFinalizado.preco,
+				nome :  $scope.pedido.nome,
+				endereco : $scope.pedido.endereco,
+				email : $scope.pedido.email
+			}
+		}
+
+		CarroService.salvarPedido(pedidoFinalizado).then(function(dados){
+
+			$ionicPopup.alert({
+				title: 'Parabens',
+				template: 'Você acaba de comprar um carro.'
+			}).then(function(){
+				$state.go('listagem');
+			});
+
+		}, function(erro){
+			$ionicPopup.alert({
+				title: 'Deu erro',
+				template: 'Campos obrigatórios'
+			});
+		});
+
+	}
+
 });
